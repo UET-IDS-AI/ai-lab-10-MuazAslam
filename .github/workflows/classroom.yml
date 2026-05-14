@@ -1,0 +1,48 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Q1
+      id: q1
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Q1
+        setup-command: pip install numpy pytest scikit-learn
+        command: pytest test_AIstats_lab.py::test_generate_nonlinear_data_shape test_AIstats_lab.py::test_generate_nonlinear_data_reproducibility
+          test_AIstats_lab.py::test_create_polynomial_model_predicts test_AIstats_lab.py::test_evaluate_polynomial_degrees_structure
+          test_AIstats_lab.py::test_diagnose_from_errors_high_bias test_AIstats_lab.py::test_diagnose_from_errors_high_variance
+          test_AIstats_lab.py::test_diagnose_from_errors_high_bias_and_high_variance
+          test_AIstats_lab.py::test_diagnose_from_errors_good_fit -q
+        timeout: 10
+        max-score: 5
+    - name: Q2
+      id: q2
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Q2
+        setup-command: pip install numpy pytest scikit-learn
+        command: pytest test_AIstats_lab.py::test_generate_nonlinear_data_shape test_AIstats_lab.py::test_generate_nonlinear_data_reproducibility
+          test_AIstats_lab.py::test_create_polynomial_model_predicts test_AIstats_lab.py::test_evaluate_polynomial_degrees_structure
+          test_AIstats_lab.py::test_diagnose_from_errors_high_bias test_AIstats_lab.py::test_diagnose_from_errors_high_variance
+          test_AIstats_lab.py::test_diagnose_from_errors_high_bias_and_high_variance
+          test_AIstats_lab.py::test_diagnose_from_errors_good_fit -q
+        timeout: 10
+        max-score: 5
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        Q1_RESULTS: "${{steps.q1.outputs.result}}"
+        Q2_RESULTS: "${{steps.q2.outputs.result}}"
+      with:
+        runners: q1,q2
